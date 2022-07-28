@@ -3,29 +3,52 @@ import Cliente from "../core/Cliente";
 import Tabela from "./components/Tabela";
 import Botao from "./components/Botao";
 import Formulario from "./components/Formulario";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import ClienteRepositorio from "../core/ClienteRepositorio";
+import ColecaoCliente from "../backend/db/ColecaoCliente";
 
 export default function Home() {
-  const clientes = [
+
+  const repo: ClienteRepositorio = new ColecaoCliente()
+
+  const[cliente, setCliente] = useState<Cliente>(Cliente.vazio())
+  const[clientes, setClientes] = useState<Cliente[]>([])
+  const [visivel, setVisivel] = useState< 'tabela' | 'form' >('tabela')
+
+  useEffect(obterTodos, []);
+
+function obterTodos()
+  repo.obterTodos().then(clientes => {
+  setClientes(clientes)
+  setVisivel('tabela')
+})
+
+  /* const clientes = [
     new Cliente('Ana', 34, '1'),
     new Cliente('Bia', 45, '2'),
     new Cliente('Pedro', 23, '3'),
     new Cliente('Carlos', 54, '4')
-  ]
+  ] */
 
 function clienteSelecionado(cliente: Cliente){
   console.log(cliente.nome)
+  setCliente(cliente)
+  setVisivel('form')
 }
 function clienteExcluido(cliente: Cliente){
   console.log(`excluir.... ${cliente.nome}`)
 }
 
-function salvarCliente(cliente:Cliente){
-  console.log(cliente)
-  setVisivel('tabela')
+async function salvarCliente(cliente:Cliente){
+  await repo.salvar(cliente)
+  obterTodos()
+}
+function novoCliente(){
+  setCliente(Cliente.vazio())
+  setVisivel('form')
 }
 
-const [visivel, setVisivel] = useState< 'tabela' | 'form' >('tabela')
+
 
   return (
     <div className={`
@@ -41,7 +64,7 @@ const [visivel, setVisivel] = useState< 'tabela' | 'form' >('tabela')
             <>
             <div className="flex justify-end">
             <Botao cor='green' className="mb-4"
-            onClick={() => setVisivel('form')}>Novo Cliente</Botao>
+            onClick={novoCliente}>Novo Cliente</Botao>
             </div>
             <Tabela
             clientes={clientes}
@@ -51,7 +74,7 @@ const [visivel, setVisivel] = useState< 'tabela' | 'form' >('tabela')
          </>
           ) : (
             <Formulario
-            cliente={clientes[0]}
+            cliente={cliente}
             clienteMudou={salvarCliente}
             cancelado={() => setVisivel('tabela')}
             />
