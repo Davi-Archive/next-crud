@@ -25,6 +25,10 @@ function salvarCliente(cliente:Cliente){
   setVisivel('tabela')
 }
 
+function novoCliente(cliente:Cliente){
+  
+}
+
 const [visivel, setVisivel] = useState< 'tabela' | 'form' >('tabela')
 
   return (
